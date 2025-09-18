@@ -6,7 +6,7 @@ import torch
 from sklearn.datasets import make_classification
 from sklearn.exceptions import NotFittedError
 
-from ncdr import NCDR
+from encdr import NCDR
 
 
 class TestNCDR:

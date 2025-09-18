@@ -11,7 +11,7 @@ from sklearn.datasets import load_iris, make_classification
 from sklearn.decomposition import PCA
 from sklearn.model_selection import train_test_split
 
-from ncdr import NCDR
+from encdr import NCDR
 
 
 def basic_example():

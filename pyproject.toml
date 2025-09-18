@@ -1,11 +1,9 @@
 [project]
-name = "ncdr"
-version = "0.1.0"
-description = "Add your description here"
+name = "encdr"
+version = "1.0.0"
+description = "A Python library for autoencoder-based dimensionality reduction with a scikit-learn compatible interface."
 readme = "README.md"
-authors = [
-    { name = "henrywatkins", email = "h.watkins@ucl.ac.uk" }
-]
+license = "MIT"
 requires-python = ">=3.12"
 dependencies = [
     "lightning>=2.5.5",
@@ -13,10 +11,6 @@ dependencies = [
     "torch>=2.0.0",
     "numpy>=1.21.0",
 ]
-
-[project.scripts]
-ncdr = "ncdr:main"
-
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"

@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 import torch
 
-from ncdr.autoencoder import AutoEncoder
+from encdr.autoencoder import AutoEncoder
 
 
 class TestAutoEncoder:
