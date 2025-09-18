@@ -134,7 +134,7 @@ class ENCDR(BaseEstimator, TransformerMixin):
             train_loader = DataLoader(dataset, batch_size=self.batch_size, shuffle=True)
             return train_loader, None
 
-    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> "NCDR":
+    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> "ENCDR":
         """
         Fit the autoencoder model to the data.
 

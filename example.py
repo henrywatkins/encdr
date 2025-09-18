@@ -11,12 +11,13 @@ from sklearn.datasets import load_iris, make_classification
 from sklearn.decomposition import PCA
 from sklearn.model_selection import train_test_split
 
-from encdr import NCDR
+from encdr import ENCDR
+
 
 
 def basic_example():
-    """Basic NCDR usage example."""
-    print("=== Basic NCDR Example ===")
+    """Basic ENCDR usage example."""
+    print("=== Basic ENCDR Example ===")
 
     # Generate sample data
     X, y = make_classification(
@@ -24,8 +25,8 @@ def basic_example():
     )
     print(f"Generated dataset: {X.shape[0]} samples, {X.shape[1]} features")
 
-    # Create and train NCDR
-    ncdr = NCDR(
+    # Create and train ENCDR
+    encdr = ENCDR(
         hidden_dims=[32, 16],
         latent_dim=5,
         max_epochs=50,
@@ -34,17 +35,17 @@ def basic_example():
     )
 
     # Fit and transform
-    X_reduced = ncdr.fit_transform(X)
+    X_reduced = encdr.fit_transform(X)
     print(f"Reduced to {X_reduced.shape[1]} dimensions")
 
     # Reconstruct data
-    X_reconstructed = ncdr.predict(X)
+    X_reconstructed = encdr.predict(X)
     mse = np.mean((X - X_reconstructed) ** 2)
     print(f"Reconstruction MSE: {mse:.4f}")
 
     # Score (negative MSE)
-    score = ncdr.score(X)
-    print(f"NCDR Score: {score:.4f}")
+    score = encdr.score(X)
+    print(f"ENCDR Score: {score:.4f}")
     print()
 
 
@@ -57,8 +58,8 @@ def iris_visualization():
     X, y = iris.data, iris.target
     print(f"Iris dataset: {X.shape[0]} samples, {X.shape[1]} features")
 
-    # Compare NCDR with PCA
-    ncdr = NCDR(
+    # Compare ENCDR with PCA
+    encdr = ENCDR(
         hidden_dims=[6, 4],
         latent_dim=2,
         max_epochs=100,
@@ -69,25 +70,25 @@ def iris_visualization():
     pca = PCA(n_components=2, random_state=42)
 
     # Transform data
-    X_ncdr = ncdr.fit_transform(X)
+    X_encdr = encdr.fit_transform(X)
     X_pca = pca.fit_transform(X)
 
     # Calculate reconstruction errors
-    X_ncdr_reconstructed = ncdr.predict(X)
+    X_encdr_reconstructed = encdr.predict(X)
     X_pca_reconstructed = pca.inverse_transform(X_pca)
 
-    ncdr_mse = np.mean((X - X_ncdr_reconstructed) ** 2)
+    encdr_mse = np.mean((X - X_encdr_reconstructed) ** 2)
     pca_mse = np.mean((X - X_pca_reconstructed) ** 2)
 
-    print(f"NCDR reconstruction MSE: {ncdr_mse:.4f}")
+    print(f"ENCDR reconstruction MSE: {encdr_mse:.4f}")
     print(f"PCA reconstruction MSE: {pca_mse:.4f}")
 
     # Plot comparison
     fig, axes = plt.subplots(1, 2, figsize=(12, 5))
 
-    # NCDR plot
-    scatter1 = axes[0].scatter(X_ncdr[:, 0], X_ncdr[:, 1], c=y, cmap="viridis")
-    axes[0].set_title(f"NCDR (MSE: {ncdr_mse:.4f})")
+    # ENCDR plot
+    scatter1 = axes[0].scatter(X_encdr[:, 0], X_encdr[:, 1], c=y, cmap="viridis")
+    axes[0].set_title(f"ENCDR (MSE: {encdr_mse:.4f})")
     axes[0].set_xlabel("Component 1")
     axes[0].set_ylabel("Component 2")
 
@@ -122,7 +123,7 @@ def compression_example():
     latent_dims = [5, 10, 15, 20]
 
     for latent_dim in latent_dims:
-        ncdr = NCDR(
+        encdr = ENCDR(
             hidden_dims=[64, 32],
             latent_dim=latent_dim,
             max_epochs=30,
@@ -131,11 +132,11 @@ def compression_example():
         )
 
         # Compress data
-        X_compressed = ncdr.fit_transform(X)
+        X_compressed = encdr.fit_transform(X)
         compressed_size = X_compressed.size * X_compressed.itemsize
 
         # Measure reconstruction quality
-        X_reconstructed = ncdr.predict(X)
+        X_reconstructed = encdr.predict(X)
         mse = np.mean((X - X_reconstructed) ** 2)
 
         # Calculate compression metrics
@@ -170,8 +171,8 @@ def sklearn_pipeline_example():
         [
             ("scaler", StandardScaler()),
             (
-                "ncdr",
-                NCDR(
+                "encdr",
+                ENCDR(
                     hidden_dims=[20, 10],
                     latent_dim=8,
                     max_epochs=30,
