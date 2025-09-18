@@ -14,7 +14,6 @@ from sklearn.model_selection import train_test_split
 from encdr import ENCDR
 
 
-
 def basic_example():
     """Basic ENCDR usage example."""
     print("=== Basic ENCDR Example ===")

@@ -1,4 +1,4 @@
-# NCDR - Neural Component Dimensionality Reduction
+# ENCDR - Neural Component Dimensionality Reduction
 
 A Python library for autoencoder-based dimensionality reduction with a scikit-learn compatible interface.
 
@@ -10,6 +10,7 @@ A Python library for autoencoder-based dimensionality reduction with a scikit-le
 - **Automatic Standardization**: Optional feature scaling for improved training stability
 - **Validation Support**: Built-in train/validation splits for monitoring training progress
 - **Multiple Activation Functions**: Support for ReLU, Tanh, Sigmoid, LeakyReLU, ELU, and GELU
+- **Model Persistence**: Save and load trained models with full state preservation
 
 ## Installation
 
@@ -30,7 +31,7 @@ pip install encdr
 ## Quick Start
 
 ```python
-from ncdr import NCDR
+from encdr import ENCDR
 from sklearn.datasets import make_classification
 import numpy as np
 
@@ -38,7 +39,7 @@ import numpy as np
 X, _ = make_classification(n_samples=1000, n_features=50, n_informative=30, random_state=42)
 
 # Create and train autoencoder
-ncdr = NCDR(
+encdr = ENCDR(
     hidden_dims=[64, 32, 16],  # Encoder layer sizes
     latent_dim=8,              # Bottleneck dimension
     max_epochs=50,             # Training epochs
@@ -46,13 +47,20 @@ ncdr = NCDR(
 )
 
 # Fit and transform data
-X_reduced = ncdr.fit_transform(X)
+X_reduced = encdr.fit_transform(X)
 print(f"Original shape: {X.shape}, Reduced shape: {X_reduced.shape}")
 
 # Reconstruct original data
-X_reconstructed = ncdr.predict(X)
+X_reconstructed = encdr.predict(X)
 reconstruction_error = np.mean((X - X_reconstructed) ** 2)
 print(f"Reconstruction MSE: {reconstruction_error:.4f}")
+
+# Save model for later use
+encdr.save("my_autoencoder.pkl")
+
+# Load model (in a different session)
+loaded_encdr = ENCDR.load("my_autoencoder.pkl")
+X_reduced_loaded = loaded_encdr.transform(X[:10])  # Same results as original model
 ```
 
 ## Advanced Usage
@@ -60,7 +68,7 @@ print(f"Reconstruction MSE: {reconstruction_error:.4f}")
 ### Custom Architecture
 
 ```python
-ncdr = NCDR(
+encdr = ENCDR(
     hidden_dims=[128, 64, 32, 16],     # Deep architecture
     latent_dim=10,                     # 10D latent space
     activation="tanh",                 # Tanh activation
@@ -86,7 +94,7 @@ from sklearn.model_selection import train_test_split
 # Create pipeline
 pipeline = Pipeline([
     ('scaler', StandardScaler()),
-    ('ncdr', NCDR(latent_dim=5, max_epochs=50, standardize=False))
+    ('encdr', ENCDR(latent_dim=5, max_epochs=50, standardize=False))
 ])
 
 # Split data
@@ -108,20 +116,20 @@ iris = load_iris()
 X, y = iris.data, iris.target
 
 # Reduce to 2D for visualization
-ncdr = NCDR(latent_dim=2, max_epochs=100, random_state=42)
-X_2d = ncdr.fit_transform(X)
+encdr = ENCDR(latent_dim=2, max_epochs=100, random_state=42)
+X_2d = encdr.fit_transform(X)
 
 # Plot results
 plt.figure(figsize=(10, 4))
 
 plt.subplot(1, 2, 1)
 plt.scatter(X_2d[:, 0], X_2d[:, 1], c=y, cmap='viridis')
-plt.title('NCDR: Iris Dataset (2D)')
+plt.title('ENCDR: Iris Dataset (2D)')
 plt.xlabel('Component 1')
 plt.ylabel('Component 2')
 
 # Compare reconstruction quality
-X_reconstructed = ncdr.predict(X)
+X_reconstructed = encdr.predict(X)
 mse_per_feature = np.mean((X - X_reconstructed) ** 2, axis=0)
 
 plt.subplot(1, 2, 2)
@@ -136,7 +144,7 @@ plt.show()
 
 ## API Reference
 
-### NCDR Class
+### ENCDR Class
 
 #### Parameters
 
@@ -161,4 +169,38 @@ plt.show()
 - **inverse_transform(X)**: Reconstruct data from latent representation
 - **predict(X)**: Reconstruct input data (alias for encode→decode)
 - **score(X, y=None)**: Return negative reconstruction MSE
+- **save(filepath)**: Save fitted model to disk
+- **load(filepath)**: Load saved model from disk (class method)
 
+## Model Persistence
+
+ENCDR supports saving and loading trained models for later use. This includes all model parameters, weights, and preprocessing state (such as the fitted scaler).
+
+### Saving Models
+
+```python
+# Train a model
+encdr = ENCDR(hidden_dims=[64, 32], latent_dim=8, max_epochs=50)
+encdr.fit(X_train)
+
+# Save the trained model
+encdr.save("my_model.pkl")  # .pkl extension added automatically if not provided
+encdr.save("/path/to/models/encdr_model")  # Directories created automatically
+```
+
+### Loading Models
+
+```python
+# Load a previously saved model
+loaded_encdr = ENCDR.load("my_model.pkl")
+
+# The loaded model retains all functionality
+X_transformed = loaded_encdr.transform(X_test)
+X_reconstructed = loaded_encdr.predict(X_test)
+score = loaded_encdr.score(X_test)
+
+# All original parameters are preserved
+print(f"Hidden dimensions: {loaded_encdr.hidden_dims}")
+print(f"Latent dimension: {loaded_encdr.latent_dim}")
+print(f"Model is fitted: {loaded_encdr.is_fitted_}")
+```

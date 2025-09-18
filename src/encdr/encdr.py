@@ -4,8 +4,10 @@ NCDR: Neural Component Dimensionality Reduction
 A scikit-learn compatible autoencoder for dimensionality reduction and reconstruction.
 """
 
+import pickle
 import warnings
-from typing import Any, List, Optional, Tuple, Union
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import lightning as L
 import numpy as np
@@ -352,3 +354,123 @@ class ENCDR(BaseEstimator, TransformerMixin):
         reconstruction = self.predict(X)
         mse = np.mean((X - reconstruction) ** 2)
         return float(-mse)  # Return negative MSE (higher is better)
+
+    def save(self, filepath: Union[str, Path]) -> None:
+        """
+        Save the fitted ENCDR model to disk.
+
+        Parameters
+        ----------
+        filepath : str or Path
+            Path where the model will be saved. If no extension is provided,
+            '.pkl' will be added automatically.
+
+        Raises
+        ------
+        ValueError
+            If the model has not been fitted yet.
+        """
+        if not self.is_fitted_:
+            raise ValueError("Cannot save an unfitted model. Call 'fit' first.")
+
+        filepath = Path(filepath)
+        if not filepath.suffix:
+            filepath = filepath.with_suffix(".pkl")
+
+        # Create directory if it doesn't exist
+        filepath.parent.mkdir(parents=True, exist_ok=True)
+
+        # Prepare state to save
+        save_state = {
+            # Model parameters
+            "hidden_dims": self.hidden_dims,
+            "latent_dim": self.latent_dim,
+            "learning_rate": self.learning_rate,
+            "activation": self.activation,
+            "dropout_rate": self.dropout_rate,
+            "weight_decay": self.weight_decay,
+            "batch_size": self.batch_size,
+            "max_epochs": self.max_epochs,
+            "validation_split": self.validation_split,
+            "standardize": self.standardize,
+            "random_state": self.random_state,
+            "trainer_kwargs": self.trainer_kwargs,
+            # Fitted state
+            "input_dim_": self.input_dim_,
+            "is_fitted_": self.is_fitted_,
+            # Model state dict
+            "model_state_dict": self.model_.state_dict(),
+            # Scaler
+            "scaler_": self.scaler_,
+        }
+
+        with open(filepath, "wb") as f:
+            pickle.dump(save_state, f)
+
+    @classmethod
+    def load(cls, filepath: Union[str, Path]) -> "ENCDR":
+        """
+        Load a saved ENCDR model from disk.
+
+        Parameters
+        ----------
+        filepath : str or Path
+            Path to the saved model file.
+
+        Returns
+        -------
+        encdr : ENCDR
+            The loaded ENCDR instance.
+
+        Raises
+        ------
+        FileNotFoundError
+            If the specified file does not exist.
+        """
+        filepath = Path(filepath)
+
+        if not filepath.exists():
+            raise FileNotFoundError(f"Model file not found: {filepath}")
+
+        with open(filepath, "rb") as f:
+            save_state = pickle.load(f)
+
+        # Extract parameters for initialization
+        init_params = {
+            "hidden_dims": save_state["hidden_dims"],
+            "latent_dim": save_state["latent_dim"],
+            "learning_rate": save_state["learning_rate"],
+            "activation": save_state["activation"],
+            "dropout_rate": save_state["dropout_rate"],
+            "weight_decay": save_state["weight_decay"],
+            "batch_size": save_state["batch_size"],
+            "max_epochs": save_state["max_epochs"],
+            "validation_split": save_state["validation_split"],
+            "standardize": save_state["standardize"],
+            "random_state": save_state["random_state"],
+            "trainer_kwargs": save_state["trainer_kwargs"],
+        }
+
+        # Create new instance
+        encdr = cls(**init_params)
+
+        # Restore fitted state
+        encdr.input_dim_ = save_state["input_dim_"]
+        encdr.is_fitted_ = save_state["is_fitted_"]
+        encdr.scaler_ = save_state["scaler_"]
+
+        # Recreate and load model
+        if encdr.is_fitted_:
+            encdr.model_ = AutoEncoder(
+                input_dim=encdr.input_dim_,
+                hidden_dims=encdr.hidden_dims,
+                latent_dim=encdr.latent_dim,
+                learning_rate=encdr.learning_rate,
+                activation=encdr.activation,
+                dropout_rate=encdr.dropout_rate,
+                weight_decay=encdr.weight_decay,
+            )
+            encdr.model_.load_state_dict(save_state["model_state_dict"])
+            encdr.model_.eval()
+
+        return encdr
