@@ -14,9 +14,9 @@ A Python library for autoencoder-based dimensionality reduction with a scikit-le
 ## Installation
 
 ```bash
-uv add pyncdr
+uv add encdr
 # or
-pip install pyncdr
+pip install encdr
 ```
 
 ## Dependencies

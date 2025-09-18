@@ -18,7 +18,7 @@ from torch.utils.data import DataLoader, TensorDataset
 from .autoencoder import AutoEncoder
 
 
-class NCDR(BaseEstimator, TransformerMixin):
+class ENCDR(BaseEstimator, TransformerMixin):
     """
     Neural Component Dimensionality Reduction using autoencoders.
 

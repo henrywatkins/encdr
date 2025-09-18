@@ -1,4 +1,4 @@
-"""Integration tests for the NCDR package."""
+"""Integration tests for the ENCDR package."""
 
 import numpy as np
 import pytest
@@ -8,26 +8,26 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
-from encdr import NCDR
+from encdr import ENCDR
 
 
 class TestNCDRIntegration:
-    """Integration tests for NCDR with real-world scenarios."""
+    """Integration tests for ENCDR with real-world scenarios."""
 
     def test_sklearn_pipeline_compatibility(self):
-        """Test NCDR in sklearn Pipeline."""
+        """Test ENCDR in sklearn Pipeline."""
         # Generate sample data
         X, y = make_classification(
             n_samples=200, n_features=30, n_informative=20, random_state=42
         )
 
-        # Create pipeline with NCDR
+        # Create pipeline with ENCDR
         pipeline = Pipeline(
             [
                 ("scaler", StandardScaler()),
                 (
-                    "ncdr",
-                    NCDR(
+                    "encdr",
+                    ENCDR(
                         hidden_dims=[20, 10],
                         latent_dim=5,
                         max_epochs=5,
@@ -46,7 +46,7 @@ class TestNCDRIntegration:
         assert isinstance(X_transformed, np.ndarray)
 
     def test_comparison_with_pca(self):
-        """Test NCDR performance compared to PCA."""
+        """Test ENCDR performance compared to PCA."""
         # Generate sample data
         X, _ = make_classification(
             n_samples=300, n_features=50, n_informative=30, random_state=42
@@ -60,34 +60,34 @@ class TestNCDRIntegration:
         X_train_pca = pca.fit_transform(X_train)
         X_test_pca = pca.transform(X_test)
 
-        # Fit NCDR
-        ncdr = NCDR(
+        # Fit ENCDR
+        encdr = ENCDR(
             hidden_dims=[40, 20],
             latent_dim=10,
             max_epochs=20,
             random_state=42,
             trainer_kwargs={"enable_progress_bar": False},
         )
-        X_train_ncdr = ncdr.fit_transform(X_train)
-        X_test_ncdr = ncdr.transform(X_test)
+        X_train_ncdr = encdr.fit_transform(X_train)
+        X_test_ncdr = encdr.transform(X_test)
 
         # Both should produce same dimensionality
         assert X_train_pca.shape == X_train_ncdr.shape
         assert X_test_pca.shape == X_test_ncdr.shape
 
-        # NCDR should provide reasonable reconstruction
-        X_train_reconstructed = ncdr.predict(X_train)
+        # ENCDR should provide reasonable reconstruction
+        X_train_reconstructed = encdr.predict(X_train)
         reconstruction_error = np.mean((X_train - X_train_reconstructed) ** 2)
         assert reconstruction_error < 15.0  # Reasonable reconstruction error
 
     def test_iris_dataset(self):
-        """Test NCDR on the classic iris dataset."""
+        """Test ENCDR on the classic iris dataset."""
         # Load iris dataset
         iris = load_iris()
         X, y = iris.data, iris.target
 
-        # Fit NCDR
-        ncdr = NCDR(
+        # Fit ENCDR
+        encdr = ENCDR(
             hidden_dims=[6, 4],
             latent_dim=2,
             max_epochs=50,
@@ -97,12 +97,12 @@ class TestNCDRIntegration:
         )
 
         # Transform to 2D for visualization purposes
-        X_transformed = ncdr.fit_transform(X)
+        X_transformed = encdr.fit_transform(X)
 
         assert X_transformed.shape == (150, 2)
 
         # Test reconstruction
-        X_reconstructed = ncdr.predict(X)
+        X_reconstructed = encdr.predict(X)
         assert X_reconstructed.shape == X.shape
 
         # Calculate reconstruction quality
@@ -110,12 +110,12 @@ class TestNCDRIntegration:
         print(f"Iris reconstruction error: {reconstruction_error:.4f}")
 
         # Score should be negative MSE
-        score = ncdr.score(X)
+        score = encdr.score(X)
         assert score <= 0
         assert abs(score - (-reconstruction_error)) < 1e-6
 
     def test_batch_processing(self):
-        """Test NCDR with different batch sizes."""
+        """Test ENCDR with different batch sizes."""
         # Generate large dataset
         X, _ = make_classification(
             n_samples=1000, n_features=40, n_informative=25, random_state=42
@@ -124,7 +124,7 @@ class TestNCDRIntegration:
         results = {}
 
         for batch_size in [16, 32, 64, 128]:
-            ncdr = NCDR(
+            encdr = ENCDR(
                 hidden_dims=[30, 15],
                 latent_dim=8,
                 batch_size=batch_size,
@@ -133,7 +133,7 @@ class TestNCDRIntegration:
                 trainer_kwargs={"enable_progress_bar": False},
             )
 
-            X_transformed = ncdr.fit_transform(X)
+            X_transformed = encdr.fit_transform(X)
             results[batch_size] = X_transformed
 
             assert X_transformed.shape == (1000, 8)
@@ -146,7 +146,7 @@ class TestNCDRIntegration:
             assert correlation > 0.3  # Should be reasonably correlated
 
     def test_different_activations_performance(self):
-        """Test NCDR with different activation functions."""
+        """Test ENCDR with different activation functions."""
         # Generate sample data
         X, _ = make_classification(
             n_samples=300, n_features=20, n_informative=15, random_state=42
@@ -156,7 +156,7 @@ class TestNCDRIntegration:
         results = {}
 
         for activation in activations:
-            ncdr = NCDR(
+            encdr = ENCDR(
                 hidden_dims=[15, 8],
                 latent_dim=5,
                 activation=activation,
@@ -165,8 +165,8 @@ class TestNCDRIntegration:
                 trainer_kwargs={"enable_progress_bar": False},
             )
 
-            ncdr.fit(X)
-            score = ncdr.score(X)
+            encdr.fit(X)
+            score = encdr.score(X)
             results[activation] = score
 
             # All activations should provide reasonable results
@@ -183,7 +183,7 @@ class TestNCDRIntegration:
         )
 
         # Model with high capacity and many epochs
-        ncdr = NCDR(
+        encdr = ENCDR(
             hidden_dims=[30, 20, 10],
             latent_dim=5,
             max_epochs=100,
@@ -193,13 +193,13 @@ class TestNCDRIntegration:
             trainer_kwargs={"enable_progress_bar": False},
         )
 
-        ncdr.fit(X)
+        encdr.fit(X)
 
         # Should still work despite potential overfitting
-        X_transformed = ncdr.transform(X)
+        X_transformed = encdr.transform(X)
         assert X_transformed.shape == (50, 5)
 
-        score = ncdr.score(X)
+        score = encdr.score(X)
         assert isinstance(score, float)
 
     def test_memory_efficiency(self):
@@ -209,7 +209,7 @@ class TestNCDRIntegration:
             n_samples=2000, n_features=100, n_informative=50, random_state=42
         )
 
-        ncdr = NCDR(
+        encdr = ENCDR(
             hidden_dims=[80, 40, 20],
             latent_dim=10,
             batch_size=64,
@@ -219,11 +219,11 @@ class TestNCDRIntegration:
         )
 
         # Should handle larger dataset without issues
-        X_transformed = ncdr.fit_transform(X)
+        X_transformed = encdr.fit_transform(X)
         assert X_transformed.shape == (2000, 10)
 
         # Test batch-wise processing
-        X_reconstructed = ncdr.predict(X)
+        X_reconstructed = encdr.predict(X)
         assert X_reconstructed.shape == X.shape
 
     def test_edge_cases(self):
@@ -231,7 +231,7 @@ class TestNCDRIntegration:
         # Very small dataset
         X_small = np.random.randn(5, 10).astype(np.float32)
 
-        ncdr_small = NCDR(
+        ncdr_small = ENCDR(
             hidden_dims=[8, 4],
             latent_dim=2,
             batch_size=2,
@@ -259,7 +259,7 @@ class TestNCDRIntegration:
         X_small = np.random.randn(100, 20).astype(np.float32) * 0.001
 
         for X, name in [(X_large, "large"), (X_small, "small")]:
-            ncdr = NCDR(
+            encdr = ENCDR(
                 hidden_dims=[15, 8],
                 latent_dim=4,
                 max_epochs=5,
@@ -268,13 +268,13 @@ class TestNCDRIntegration:
                 trainer_kwargs={"enable_progress_bar": False},
             )
 
-            X_transformed = ncdr.fit_transform(X)
+            X_transformed = encdr.fit_transform(X)
             assert X_transformed.shape == (100, 4)
             assert np.isfinite(
                 X_transformed
             ).all(), f"Non-finite values in {name} scale data"
 
-            X_reconstructed = ncdr.predict(X)
+            X_reconstructed = encdr.predict(X)
             assert np.isfinite(
                 X_reconstructed
             ).all(), f"Non-finite reconstruction for {name} scale data"

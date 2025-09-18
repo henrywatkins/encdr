@@ -1,4 +1,4 @@
-"""Tests for the NCDR package imports and public API."""
+"""Tests for the ENCDR package imports and public API."""
 
 import pytest
 
@@ -11,10 +11,10 @@ def test_package_import():
 
 
 def test_ncdr_class_import():
-    """Test that NCDR class can be imported."""
-    from encdr import NCDR
+    """Test that ENCDR class can be imported."""
+    from encdr import ENCDR
 
-    assert NCDR is not None
+    assert ENCDR is not None
 
 
 def test_autoencoder_import():
@@ -37,7 +37,7 @@ def test_package_all():
     import encdr
 
     assert hasattr(encdr, "__all__")
-    assert "NCDR" in encdr.__all__
+    assert "ENCDR" in encdr.__all__
     assert "AutoEncoder" in encdr.__all__
 
 
@@ -49,14 +49,14 @@ def test_main_function():
 
 
 def test_ncdr_instantiation():
-    """Test that NCDR can be instantiated."""
-    from encdr import NCDR
+    """Test that ENCDR can be instantiated."""
+    from encdr import ENCDR
 
-    ncdr = NCDR()
-    assert ncdr is not None
-    assert hasattr(ncdr, "fit")
-    assert hasattr(ncdr, "transform")
-    assert hasattr(ncdr, "predict")
+    encdr = ENCDR()
+    assert encdr is not None
+    assert hasattr(encdr, "fit")
+    assert hasattr(encdr, "transform")
+    assert hasattr(encdr, "predict")
 
 
 def test_autoencoder_instantiation():

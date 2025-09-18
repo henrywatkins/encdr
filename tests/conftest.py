@@ -1,4 +1,4 @@
-"""Test configuration and fixtures for NCDR tests."""
+"""Test configuration and fixtures for ENCDR tests."""
 
 import numpy as np
 import pytest
@@ -52,8 +52,8 @@ def regression_dataset(random_state):
 
 
 @pytest.fixture
-def ncdr_params():
-    """Default NCDR parameters for testing."""
+def encdr_params():
+    """Default ENCDR parameters for testing."""
     return {
         "hidden_dims": [32, 16],
         "latent_dim": 8,
