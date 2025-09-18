@@ -1,11 +1,11 @@
 # NCDR - Neural Component Dimensionality Reduction
 
-A professional Python library for autoencoder-based dimensionality reduction with a scikit-learn compatible interface.
+A Python library for autoencoder-based dimensionality reduction with a scikit-learn compatible interface.
 
 ## Features
 
 - **Scikit-learn Compatible**: Implements `fit()`, `transform()`, `predict()`, and `fit_transform()` methods
-- **PyTorch Lightning Backend**: Professional deep learning framework with automatic GPU support
+- **PyTorch Lightning Backend**: Deep learning framework with automatic GPU support
 - **Configurable Architecture**: Customizable encoder/decoder layers, activation functions, and training parameters
 - **Automatic Standardization**: Optional feature scaling for improved training stability
 - **Validation Support**: Built-in train/validation splits for monitoring training progress
